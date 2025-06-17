@@ -3,12 +3,61 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import gsap from 'gsap';
 
 const canvas = document.querySelector("#experience-canvas");
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight
+};
+
+const modals = {
+  about: document.querySelector(".modal.about"),
+  projects: document.querySelector(".modal.projects"),
+  contact: document.querySelector(".modal.contact"),
 }
+
+document.querySelectorAll(".modal-exit-button").forEach((button) => {
+  button.addEventListener("click", (e) => {
+    const modal = e.target.closest(".modal");
+    hideModal(modal);
+  })
+})
+
+const showModal = (modal) => {
+  modal.style.display = "block";
+
+  gsap.set(modal, {opacity: 0});
+
+  gsap.to(modal, {
+    opacity: 1, 
+    duration: 0.5,
+  });
+};
+
+const hideModal = (modal) => {
+  gsap.to(modal, {
+    opacity: 0, 
+    duration: 0.5,
+    onComplete: () => {
+      modal.style.display = "none";
+    } 
+  });
+};
+
+const zAxisFans = [];
+
+const raycasterObjects = [];
+let currentIntersects = [];
+
+const socialLinks = {
+  Button_Git: "https://github.com/",
+  Button_LN: "https://linkedin.com/",
+  Button_IG: "https://instagram.com/",
+}
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
 
 // loaders
 const textureLoader = new THREE.TextureLoader();
@@ -43,7 +92,7 @@ const loadedTextures = {
   day: {},
 };
 
-Object.entries(textureMap).forEach(([key, paths])=>{
+Object.entries(textureMap).forEach(([key, paths]) => {
   const dayTexture = textureLoader.load(paths.day);
   dayTexture.flipY = false;
   dayTexture.colorSpace = THREE.SRGBColorSpace;
@@ -60,8 +109,8 @@ const glassMaterial = new THREE.MeshPhysicalMaterial({
   specularIntensity: 1,
   envMap: environmentMap,
   envMapIntensity: 1,
-  lightIntensity: 1,
-  exposure: 1,
+  // lightIntensity: 1,
+  // exposure: 1,
 });
 
 // if i want vid on screen, later thing
@@ -77,9 +126,42 @@ const glassMaterial = new THREE.MeshPhysicalMaterial({
 // videoTexture.colorSpace = THREE.SRGBColorSpace;
 // videoTexture.flipY = false;
 
-loader.load("/models/Room_Portfolio_V1.glb", (glb)=>{
-  glb.scene.traverse(child=>{
+window.addEventListener("mousemove", (e) => {
+  pointer.x = (e.clientX / sizes.width) * 2 - 1;
+  pointer.y = -(e.clientY / sizes.height) * 2 + 1;
+});
+
+window.addEventListener("click", (e) => {
+  if (currentIntersects.length > 0) {
+    const object = currentIntersects[0].object;
+
+    Object.entries(socialLinks).forEach(([key, url]) => {
+      if (object.name.includes(key)) {
+        const newWindow = window.open();
+        newWindow.opener = null;
+        newWindow.location = url;
+        newWindow.target = "_blank";
+        newWindow.rel = "noopener noreferrer";
+      }
+    });
+
+    if (object.name.includes("Button_About")) {
+      showModal(modals.about);
+    } else if (object.name.includes("Button_Projects")) {
+      showModal(modals.projects);
+    } else if (object.name.includes("Button_Contact")) {
+      showModal(modals.contact);
+    }
+  }
+});
+
+loader.load("/models/Room_Portfolio_V2.glb", (glb) => {
+  glb.scene.traverse((child) => {
     if (child.isMesh) {
+      if (child.name.includes("Raycaster")) {
+        raycasterObjects.push(child);
+      }
+
       if (child.name.includes("Glass")) {
         child.material = glassMaterial;
       // } else if (child.name.includes("Screen")) {
@@ -87,13 +169,17 @@ loader.load("/models/Room_Portfolio_V1.glb", (glb)=>{
       //     map: videoTexture,
       //   });
       } else {
-        Object.keys(textureMap).forEach(key=>{
+        Object.keys(textureMap).forEach((key) => {
           if (child.name.includes(key)) {
             const material = new THREE.MeshBasicMaterial({
               map: loadedTextures.day[key],
             });
 
             child.material = material;
+
+            if (child.name.includes("Fan")) {
+              zAxisFans.push(child);
+            }
 
             if (child.material.map) {
               child.material.map.minFilter = THREE.LinearFilter;
@@ -130,7 +216,7 @@ controls.update();
 controls.target.set(0.0036804629215764265, 2.925270170662769, -1.3687831470571423);
 
 // event listeners
-window.addEventListener("resize", ()=>{
+window.addEventListener("resize", () => {
   sizes.width = window.innerWidth;
 
   sizes.height = window.innerHeight;
@@ -146,15 +232,38 @@ window.addEventListener("resize", ()=>{
 
 function animate() {}
 
-const render = ()=> {
+const render = () => {
   controls.update(); 
 
   // console.log(camera.position);
   // console.log("-----------");
   // console.log(controls.target);
 
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
+  // animate fans
+  zAxisFans.forEach((fan) => {
+    fan.rotation.z += 0.01;
+  });
+
+  // raycaster
+  raycaster.setFromCamera( pointer, camera );
+
+	currentIntersects = raycaster.intersectObjects( raycasterObjects );
+
+	for (let i = 0; i < currentIntersects.length; i ++) {
+		currentIntersects[i].object.material.color.set( 0xff0000 );
+	}
+
+  if (currentIntersects.length > 0) {
+    const currentIntersectObject = currentIntersects[0].object;
+
+    if (currentIntersectObject.name.includes("Pointer")) {
+      document.body.style.cursor = "pointer";
+    } else {
+      document.body.style.cursor = "default";
+    }
+  } else {
+    document.body.style.cursor = "default";
+  }
 
   renderer.render( scene, camera );
 
