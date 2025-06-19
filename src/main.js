@@ -1,6 +1,6 @@
 import './style.scss'
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OrbitControls } from './utils/OrbitControls.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import gsap from 'gsap';
@@ -34,8 +34,19 @@ document.querySelectorAll(".modal-exit-button").forEach((button) => {
   }, {passive: false});
 });
 
+let isModalOpen = false;
+
 const showModal = (modal) => {
   modal.style.display = "block";
+  isModalOpen = true;
+  controls.enabled = false;
+
+  if (currentHoveredObject) {
+    playHoverAnimation(currentHoveredObject, false);
+    currentHoveredObject = null;
+  }
+  document.body.style.cursor = "default";
+  currentIntersects = [];
 
   gsap.set(modal, {opacity: 0});
 
@@ -46,6 +57,9 @@ const showModal = (modal) => {
 };
 
 const hideModal = (modal) => {
+  isModalOpen = false;
+  controls.enabled = true;
+
   gsap.to(modal, {
     opacity: 0, 
     duration: 0.5,
@@ -55,15 +69,15 @@ const hideModal = (modal) => {
   });
 };
 
-const zAxisFans = [];
-
 const raycasterObjects = [];
 let currentIntersects = [];
+let currentHoveredObject = null;
 
 const socialLinks = {
   Button_Git: "https://github.com/",
   Button_LN: "https://linkedin.com/",
   Button_IG: "https://instagram.com/",
+  Headphones: "https://spotify.com/",
 }
 
 const raycaster = new THREE.Raycaster();
@@ -109,7 +123,7 @@ Object.entries(textureMap).forEach(([key, paths]) => {
   loadedTextures.day[key] = dayTexture;
 });
 
-const glassMaterial = new THREE.MeshPhysicalMaterial({
+const pc_Material = new THREE.MeshPhysicalMaterial({
   transmission: 1,
   opacity: 1,
   metalness: 0,
@@ -121,6 +135,18 @@ const glassMaterial = new THREE.MeshPhysicalMaterial({
   envMapIntensity: 1,
   // lightIntensity: 1,
   // exposure: 1,
+});
+
+const matcha_Material = new THREE.MeshPhysicalMaterial({
+  transmission: 1,
+  opacity: 1,
+  metalness: 0,
+  roughness: 0,
+  ior: 1.5,
+  thickness: 0.01,
+  specularIntensity: 1,
+  envMap: environmentMap,
+  envMapIntensity: 1,
 });
 
 // if i want vid on screen, later thing
@@ -143,6 +169,7 @@ window.addEventListener("mousemove", (e) => {
 });
 
 window.addEventListener("touchstart", (e) => {
+  if (isModalOpen) {return}
   e.preventDefault();
   pointer.x = (e.touches[0].clientX / sizes.width) * 2 - 1;
   pointer.y = -(e.touches[0].clientY / sizes.height) * 2 + 1;
@@ -150,6 +177,7 @@ window.addEventListener("touchstart", (e) => {
   {passive: false}
 );
 window.addEventListener("touchend", (e) => {
+  if (isModalOpen) {return}
   e.preventDefault();
   handleRayCasterInteraction();
   },
@@ -182,19 +210,43 @@ function handleRayCasterInteraction() {
 
 window.addEventListener("click", handleRayCasterInteraction);
 
-loader.load("/models/Room_Portfolio_V2.glb", (glb) => {
+let hourHand;
+let minuteHand;
+let chairTop;
+const zAxisFans = [];
+
+loader.load("/models/Room_Portfolio.glb", (glb) => {
   glb.scene.traverse((child) => {
     if (child.isMesh) {
+      if (child.name.includes("ChairTop")) {
+        chairTop = child;
+        child.userData.initialRotation = new THREE.Euler().copy(child.rotation);
+      }
+      if (child.name.includes("ClHour")) {
+        hourHand = child;
+        child.userData.initialRotation = new THREE.Euler().copy(child.rotation);
+      }
+      if (child.name.includes("ClMin")) {
+        minuteHand = child;
+        child.userData.initialRotation = new THREE.Euler().copy(child.rotation);
+      }
       if (child.name.includes("Raycaster")) {
         raycasterObjects.push(child);
       }
+      if (child.name.includes("Hover1")) {
+        child.userData.initialScale = new THREE.Vector3().copy(child.scale);
+        child.userData.initialPosition = new THREE.Vector3().copy(child.position);
+        child.userData.initialRotation = new THREE.Euler().copy(child.rotation);
+      }
 
-      if (child.name.includes("Glass")) {
-        child.material = glassMaterial;
-      // } else if (child.name.includes("Screen")) {
-      //   child.material = new THREE.MeshBasicMaterial({
-      //     map: videoTexture,
-      //   });
+      if (child.name.includes("PC_Glass")) {
+        child.material = pc_Material;
+      } else if (child.name.includes("Matcha_Glass")) {
+        child.material = matcha_Material;
+        // } else if (child.name.includes("Screen")) {
+        //   child.material = new THREE.MeshBasicMaterial({
+        //     map: videoTexture,
+        //   });
       } else {
         Object.keys(textureMap).forEach((key) => {
           if (child.name.includes(key)) {
@@ -217,8 +269,17 @@ loader.load("/models/Room_Portfolio_V2.glb", (glb) => {
     }
   });
   scene.add(glb.scene);
+  // playIntroAnimation();
 });
 
+// function playIntroAnimation() {
+//   const t1 = gsap.timeline({
+//     duration: 0.8,
+//     ease: "back.out(1.8)",
+//   });
+
+//   t1.to()
+// }
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 
   35, 
@@ -228,15 +289,21 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(19.091589234676704, 10.089789056381026, 17.389709025564372);
 const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
-renderer.setSize( sizes.width, sizes.height );
+renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const cube = new THREE.Mesh( geometry, material );
-scene.add( cube );
+// const geometry = new THREE.BoxGeometry(1, 1, 1);
+// const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+// const cube = new THREE.Mesh(geometry, material);
+// scene.add(cube);
 
-const controls = new OrbitControls( camera, renderer.domElement );
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.minDistance = 10;
+controls.maxDistance = 50;
+controls.minPolarAngle = 0;
+controls.maxPolarAngle = Math.PI / 2;
+controls.minAzimuthAngle = 0;
+controls.maxAzimuthAngle = Math.PI / 2;
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.update(); 
@@ -257,10 +324,65 @@ window.addEventListener("resize", () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 })
 
-function animate() {}
+function playHoverAnimation(object, isHovering) {
+  gsap.killTweensOf(object.scale);
+  gsap.killTweensOf(object.position);
+  gsap.killTweensOf(object.rotation);
 
-const render = () => {
+  if (isHovering) {
+    gsap.to(object.scale, {
+      x: object.userData.initialScale.x * 1.2,
+      y: object.userData.initialScale.y * 1.2,
+      z: object.userData.initialScale.z * 1.2,
+      duration: 0.5,
+      ease: "bounce.out(1.8)",
+    });
+    gsap.to(object.rotation, {
+      x: object.userData.initialRotation.x + Math.PI / 8,
+      duration: 0.5,
+      ease: "bounce.out(1.8)",
+    });
+  } else {
+    gsap.to(object.scale, {
+      x: object.userData.initialScale.x,
+      y: object.userData.initialScale.y,
+      z: object.userData.initialScale.z,
+      duration: 0.3,
+      ease: "bounce.out(1.8)",
+    });
+    gsap.to(object.rotation, {
+      x: object.userData.initialRotation.x,
+      duration: 0.3,
+      ease: "bounce.out(1.8)",
+    });
+  }
+}
+
+// clock stuff
+const clock = new THREE.Clock();
+
+const updateClockHands = () => {
+  if (!hourHand || !minuteHand) return;
+
+  const now = new Date();
+  const hours = now.getHours() % 12;
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+
+  const minuteAngle = (minutes + seconds / 60) * ((Math.PI * 2) / 60);
+
+  const hourAngle = (hours + minutes / 60) * ((Math.PI * 2) / 12);
+
+  minuteHand.rotation.x = -minuteAngle;
+  hourHand.rotation.x = -hourAngle;
+};
+
+const render = (timestamp) => {
+  const elapsedTime = clock.getElapsedTime();
+
   controls.update(); 
+
+  updateClockHands();
 
   // console.log(camera.position);
   // console.log("-----------");
@@ -271,29 +393,56 @@ const render = () => {
     fan.rotation.z += 0.01;
   });
 
-  // raycaster
-  raycaster.setFromCamera( pointer, camera );
+  if (chairTop) {
+    const time = timestamp * 0.001;
+    const baseAmplitude = Math.PI / 8;
 
-	currentIntersects = raycaster.intersectObjects( raycasterObjects );
+    const rotationOffset =
+      baseAmplitude *
+      Math.sin(time * 0.5) *
+      (1 - Math.abs(Math.sin(time * 0.5)) * 0.3);
 
-	for (let i = 0; i < currentIntersects.length; i ++) {
-		currentIntersects[i].object.material.color.set( 0xff0000 );
-	}
-
-  if (currentIntersects.length > 0) {
-    const currentIntersectObject = currentIntersects[0].object;
-
-    if (currentIntersectObject.name.includes("Pointer")) {
-      document.body.style.cursor = "pointer";
-    } else {
-      document.body.style.cursor = "default";
-    }
-  } else {
-    document.body.style.cursor = "default";
+    chairTop.rotation.y = chairTop.userData.initialRotation.y + rotationOffset;
   }
 
-  renderer.render( scene, camera );
+  // raycaster
+  if (!isModalOpen) {
+    raycaster.setFromCamera(pointer, camera);
 
+    currentIntersects = raycaster.intersectObjects(raycasterObjects);
+
+    // for (let i = 0; i < currentIntersects.length; i ++) {
+    //   currentIntersects[i].object.material.color.set(0xff0000);
+    // }
+
+    if (currentIntersects.length > 0) {
+      const currentIntersectObject = currentIntersects[0].object;
+
+      if (currentIntersectObject.name.includes("Hover1")) {
+        if (currentIntersectObject !== currentHoveredObject) {
+          if (currentHoveredObject) {
+            playHoverAnimation(currentHoveredObject, false);
+          }
+          playHoverAnimation(currentIntersectObject, true);
+          currentHoveredObject = currentIntersectObject;
+        }
+      }
+
+      if (currentIntersectObject.name.includes("Pointer")) {
+        document.body.style.cursor = "pointer";
+      } else {
+        document.body.style.cursor = "default";
+      }
+    } else {
+      if (currentHoveredObject) {
+            playHoverAnimation(currentHoveredObject, false);
+            currentHoveredObject = null;
+          }
+      document.body.style.cursor = "default";
+    }
+  }
+
+  renderer.render(scene, camera);
   window.requestAnimationFrame(render);
 }
 

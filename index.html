@@ -2,21 +2,91 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/images/miffy-icon.jpeg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <title>Evelyn Hsiao</title>
   </head>
   <body>
     <div id="app"></div>
+    <div class="overlay"></div>
 
     <div class="about modal">
-      <h1 class="modal-title">aboutttt</h1>
-      <button class="modal-exit-button">EXIT MODAL</button>
+      <div class="modal-wrapper">
+        <h1 class="modal-title">About me</h1>
+        <div class="modal-content">
+          <div class="modal-content-wrapper">
+            <div class="paragraph-section">
+              <div class="image-wrapper">
+                <img
+                  class="base-image"
+                  src="/images/evelyn.CR3.jpg"
+                  alt=""
+                  srcset=""
+                />
+              </div>
+              <div class="intro">
+                <h2 class="modal-paragraph-header">hello!</h2>
+                <p class="modal-paragraph-text">
+                  I'm Evelyn, a junior pursing double degrees in Computer Science and Mathematics at Texas A&M University.
+                </p>
+                <p class="modal-paragraph-text sm-margin-top">
+                  Aside from full-stack web development, I'd like to explore combinatorics, optimization algorithms, and get into quant development.
+                </p>
+                <p class="modal-paragraph-text sm-margin-top">
+                  In my free time, I enjoy fashion, dancing, rock climbing, and playing word hunt😎.
+                </p>
+              </div>
+            </div>
+            <div>
+
+              <h2 class="modal-paragraph-header">What I'm Up To:</h2>
+              <ul>
+                <li class="list-text">
+                  blender
+                </li>
+                <li class="list-text">
+                  smth
+                </li>
+                <li class="list-text">
+                 smth
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="modal-exit-button">
+        <svg
+          width="98"
+          height="96"
+          viewBox="0 0 98 96"
+          class="exit-button-svg"
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            width="115.92"
+            height="17.889"
+            rx="8.94448"
+            transform="matrix(-0.696845 0.717222 0.717222 0.696845 83.1709 0)"
+            fill="currentColor"
+          />
+          <rect
+            width="115.92"
+            height="17.889"
+            rx="8.94448"
+            transform="matrix(0.73406 0.679084 0.679084 -0.73406 0 13.1318)"
+            fill="currentColor"
+          />
+        </svg>
+      </button>
     </div>
+
     <div class="projects modal"> 
       <h1 class="modal-title">projectssss</h1>
       <button class="modal-exit-button">EXIT MODAL</button>
     </div>
+    
     <div class="contact modal"> 
       <h1 class="modal-title">contactttt</h1>
       <button class="modal-exit-button">EXIT MODAL</button>
