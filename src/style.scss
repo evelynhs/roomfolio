@@ -1,13 +1,14 @@
 @use "./styles/fonts.scss";
 @use "./styles/reset.scss";
 @use "./styles/variables.scss" as vars;
-@use "./styles/defaults.scss" as media;
+//@use "./styles/defaults.scss" as media;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 *{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Motley Forces", Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: "Motley Forces", sans-serif;
 }
 
 body {
@@ -15,7 +16,7 @@ body {
 }
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -40,24 +41,19 @@ body {
   }
 }
 
-// images
-.image-wrapper {
-  width: 200px;
-  height: 200px;
-  overflow: hidden;
-  margin: 0 auto 12px auto;
-}
-.base-image {
-  height: 200px;
-  width: 200px;
-  margin: auto;
-  border-radius: 24px;
-  object-fit: cover;
-  border: 6px solid vars.$base-purple;
-}
-
+// general
 .sm-margin-top {
   margin-top: 12px;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .overlay {
@@ -74,22 +70,39 @@ body {
   -webkit-backdrop-filter: blur(4px);
 }
 
+// images
+.image-wrapper {
+  margin-right: 1rem;
+  position: relative;
+  margin: auto;
+}
+
+.base-image {
+  width: 250px;
+  object-fit: 6px;
+  border-radius: 13px;
+  box-shadow: -1px 1px 62px -18px rgba(0, 0, 0, 0.19);
+}
+
 // modals 
 
 .modal {
   display: flex;
   flex-direction: column;
+  justify-content: center; 
   position: absolute;
   top: 50%;
   left: 50%;
-  max-width: 1200px;
+  max-width: 1000px;
+  min-height: 500px;
   width: 90%;
   transform: translate(-50%, -50%);
-  font-size: 32px;
   z-index: 9999;
   padding: 30px;
+  border-radius: 25px;
   display: none;
-  background-color: vars.$base-light-purple;
+  background-color: white;
+  border: 8px solid grey;
 }
 
 .modal-wrapper {
@@ -97,36 +110,22 @@ body {
   width: 100%;
   flex-direction: column;
   gap: 24px;
-  background-color: grey;
 }
 
-.modal-content {
+.modal-title {
+  font-size: 32px;
+  text-align: center;
+  padding: 10px 0;
+}
+
+// content
+.content-wrapper {
   width: 100%;
-  height: 200px;
-  overflow: hidden;
+  max-height: 400px; 
+  overflow-y: auto; // ✨ Move scrollbar here
   position: relative;
+  padding-top: 3rem;
   -webkit-overflow-scrolling: touch;
-
-  @include media.media("<=tablet") {
-    height: 350px;
-  }
-}
-
-.about .modal-content {
-  height: 550px;
-  @include media.media("<=tablet") {
-    height: 500px;
-  }
-}
-
-.modal-content-wrapper {
-  height: 100%;
-  overflow-y: auto;
-  padding-right: 10px;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
-  background-color: white;
 
   &::-webkit-scrollbar {
     width: 8px;
@@ -139,9 +138,67 @@ body {
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color:black;
+    background-color: black;
     border-radius: 4px;
   }
+
+  @media screen and (max-width: 1000px) {
+    height: 550px;
+    margin: auto;
+    padding-top: 1rem;
+  }
+}
+
+.content {
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  justify-content: center;
+  flex-direction: column;
+}
+
+// about 
+.intro-wrapper {
+  display: flex;
+  max-width: 850px;
+
+  @media screen and (max-width: 850px) {
+    flex-direction: column;
+  }
+}
+
+.intro-text {
+  text-align: start;
+  margin: 15px;
+}
+
+.intro-text h2 {
+  padding-bottom: 1rem;
+}
+
+.intro-text p {
+  padding-bottom: 20px;
+}
+
+.list {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  text-align: left;
+  margin: auto;
+  margin: 1rem 0;
+}
+
+.list h2 {
+  padding: 10px 0;
+}
+.list p {
+  padding: 10px 0;
+}
+
+.list a{
+  color: black;
 }
 
 // exit button
@@ -150,8 +207,8 @@ body {
   position: absolute;
   top: -2.3rem;
   right: -2.3rem;
-  border: 8px solid vars.$base-purple;
-  background-color: vars.$base-light-purple;
+  border: 8px solid grey;
+  background-color: white;
   padding: 15px;
   border-radius: 1.2rem;
   cursor: pointer;
@@ -163,25 +220,25 @@ body {
     transform: rotate(45deg) scale(1.3);
   }
 
-  @include media.media("<=tablet") {
-    // Reset the top and left positions
-    top: auto;
-    left: 50%;
-    bottom: -3rem;
-    transform: translateX(-50%);
+  // @include media.media("<=tablet") {
+  //   // Reset the top and left positions
+  //   top: auto;
+  //   left: 50%;
+  //   bottom: -3rem;
+  //   transform: translateX(-50%);
 
-    &:hover {
-      transform: translateX(-50%) scale(1.3);
-    }
-  }
+  //   &:hover {
+  //     transform: translateX(-50%) scale(1.3);
+  //   }
+  // }
 }
 
 .exit-button-svg {
   width: 40px;
   height: 40px;
-  color: vars.$base-purple;
-  @include media.media("<=tablet") {
-    width: 25px;
-    height: 25px;
-  }
+  color: grey;
+  // @include media.media("<=tablet") {
+  //   width: 25px;
+  //   height: 25px;
+  // }
 }

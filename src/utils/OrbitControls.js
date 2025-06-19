@@ -39,7 +39,7 @@ const _ray = new Ray();
 const _plane = new Plane();
 const _TILT_LIMIT = Math.cos( 70 * MathUtils.DEG2RAD );
 
-const minPan = new Vector3(-1, -1, -2);
+const minPan = new Vector3(-1, 1, -2);
 const maxPan = new Vector3(2, 7, 2);
 
 const _v = new Vector3();
