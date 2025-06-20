@@ -2,5 +2,14 @@ $base-purple: #6e5e9c;
 $base-light-purple: #e8d9d8;
 $base-pink: #eedef4;
 
-$base-black: #090909;
-$base-white: #fdfdfd;
+$base-light-beige: #f3efe4;
+$base-beige: #e6e1d8;
+$base-dark-beige: #d6c7bc;
+$base-black: #313131;
+$base-white: #F1EFEC;
+
+@mixin centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

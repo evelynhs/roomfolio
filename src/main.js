@@ -77,7 +77,7 @@ const socialLinks = {
   Button_Git: "https://github.com/",
   Button_LN: "https://linkedin.com/",
   Button_IG: "https://instagram.com/",
-  Headphones: "https://spotify.com/",
+  Headphones: "https://spotify.com/", 
 }
 
 const raycaster = new THREE.Raycaster();
@@ -133,8 +133,6 @@ const pc_Material = new THREE.MeshPhysicalMaterial({
   specularIntensity: 1,
   envMap: environmentMap,
   envMapIntensity: 1,
-  // lightIntensity: 1,
-  // exposure: 1,
 });
 
 const matcha_Material = new THREE.MeshPhysicalMaterial({
@@ -233,7 +231,7 @@ loader.load("/models/Room_Portfolio.glb", (glb) => {
       if (child.name.includes("Raycaster")) {
         raycasterObjects.push(child);
       }
-      if (child.name.includes("Hover1")) {
+      if (child.name.includes("Hover")) {
         child.userData.initialScale = new THREE.Vector3().copy(child.scale);
         child.userData.initialPosition = new THREE.Vector3().copy(child.position);
         child.userData.initialRotation = new THREE.Euler().copy(child.rotation);
@@ -292,11 +290,6 @@ const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// const geometry = new THREE.BoxGeometry(1, 1, 1);
-// const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-// const cube = new THREE.Mesh(geometry, material);
-// scene.add(cube);
-
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.minDistance = 10;
 controls.maxDistance = 50;
@@ -325,23 +318,76 @@ window.addEventListener("resize", () => {
 })
 
 function playHoverAnimation(object, isHovering) {
+  let scale = 1.4;
   gsap.killTweensOf(object.scale);
   gsap.killTweensOf(object.position);
   gsap.killTweensOf(object.rotation);
 
+  if (object.name.includes("Miffy") ||
+     object.name.includes("Mailbox") ||
+     object.name.includes("Pencil") ||
+     object.name.includes("Mag") ||
+     object.name.includes("Headphones") ||
+     object.name.includes("Kettle") ||
+     object.name.includes("LOTV") ||
+     object.name.includes("Box")
+  ) {
+    scale = 1.2;
+  }
+  if (object.name.includes("MatchaDrink")) {
+    scale = 1;
+  }
+
   if (isHovering) {
     gsap.to(object.scale, {
-      x: object.userData.initialScale.x * 1.2,
-      y: object.userData.initialScale.y * 1.2,
-      z: object.userData.initialScale.z * 1.2,
+      x: object.userData.initialScale.x * scale,
+      y: object.userData.initialScale.y * scale,
+      z: object.userData.initialScale.z * scale,
       duration: 0.5,
-      ease: "bounce.out(1.8)",
+      ease: "back.out(2)",
     });
-    gsap.to(object.rotation, {
-      x: object.userData.initialRotation.x + Math.PI / 8,
-      duration: 0.5,
-      ease: "bounce.out(1.8)",
-    });
+    if (object.name.includes("Matcha_Glass")) { // matcha drink move togt
+      const matchaDrink = scene.getObjectByName("MatchaDrink_Third_Raycaster_Hover1");
+      if (matchaDrink) {
+        gsap.to(matchaDrink.scale, {
+          x: matchaDrink.userData.initialScale.x * scale,
+          y: matchaDrink.userData.initialScale.y * scale,
+          z: matchaDrink.userData.initialScale.z * scale,
+          duration: 0.5,
+          ease: "back.out(2)",
+        });
+      }
+    }
+    if (object.name.includes("Button_Projects")) {
+      gsap.to(object.rotation, {
+        x: object.userData.initialRotation.x - Math.PI / 10,
+        duration: 0.5,
+        ease: "back.out(2)",
+      });
+    } else if (
+      object.name.includes("Button_About") ||
+      object.name.includes("Button_Contact")
+    ) {
+      gsap.to(object.rotation, {
+        x: object.userData.initialRotation.x + Math.PI / 10,
+        duration: 0.5,
+        ease: "back.out(2)",
+      });
+    }
+    if (object.name.includes("Hover2")) {
+      gsap.to(object.rotation, {
+        y: object.userData.initialRotation.y - Math.PI / 36,
+        duration: 0.5,
+        ease: "back.out(2)",
+      });
+    }
+    if (object.name.includes("Hover3")) {
+      gsap.to(object.position, {
+        y: object.userData.initialPosition.y + 0.12,
+        duration: 0.5,
+        ease: "back.out(2)",
+      });
+    }
   } else {
     gsap.to(object.scale, {
       x: object.userData.initialScale.x,
@@ -350,11 +396,43 @@ function playHoverAnimation(object, isHovering) {
       duration: 0.3,
       ease: "bounce.out(1.8)",
     });
-    gsap.to(object.rotation, {
-      x: object.userData.initialRotation.x,
-      duration: 0.3,
-      ease: "bounce.out(1.8)",
-    });
+    if (
+      object.name.includes("Button_Projects") ||
+      object.name.includes("Button_About") ||
+      object.name.includes("Button_Contact")
+    ) {
+      gsap.to(object.rotation, {
+        x: object.userData.initialRotation.x,
+        duration: 0.3,
+        ease: "back.out(2)",
+      });
+    }
+    if (object.name.includes("Hover2")) {
+      gsap.to(object.rotation, {
+        y: object.userData.initialRotation.y,
+        duration: 0.3,
+        ease: "back.out(2)",
+      });
+    }
+    if (object.name.includes("Hover3")) {
+      gsap.to(object.position, {
+        y: object.userData.initialPosition.y,
+        duration: 0.3,
+        ease: "back.out(2)",
+      });
+    }
+    if (object.name.includes("Matcha_Glass")) {
+      const matchaDrink = scene.getObjectByName("MatchaDrink_Third_Raycaster_Hover1");
+      if (matchaDrink) {
+        gsap.to(matchaDrink.scale, {
+          x: matchaDrink.userData.initialScale.x,
+          y: matchaDrink.userData.initialScale.y,
+          z: matchaDrink.userData.initialScale.z,
+          duration: 0.3,
+          ease: "bounce.out(1.8)",
+        });
+      }
+    }
   }
 }
 
@@ -418,7 +496,7 @@ const render = (timestamp) => {
     if (currentIntersects.length > 0) {
       const currentIntersectObject = currentIntersects[0].object;
 
-      if (currentIntersectObject.name.includes("Hover1")) {
+      if (currentIntersectObject.name.includes("Hover")) {
         if (currentIntersectObject !== currentHoveredObject) {
           if (currentHoveredObject) {
             playHoverAnimation(currentHoveredObject, false);
