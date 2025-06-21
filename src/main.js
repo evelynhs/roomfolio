@@ -17,8 +17,54 @@ const modals = {
   contact: document.querySelector(".modal.contact"),
 }
 
+const overlay = document.querySelector(".overlay");
+overlay.addEventListener(
+  "touchend",
+  (e) => {
+    touchHappened = true;
+    e.preventDefault();
+    const modal = document.querySelector('.modal[style*="display: block"]');
+    if (modal) hideModal(modal);
+  },
+  { passive: false }
+);
+
+overlay.addEventListener(
+  "click",
+  (e) => {
+    if (touchHappened) return;
+    e.preventDefault();
+    const modal = document.querySelector('.modal[style*="display: block"]');
+    if (modal) hideModal(modal);
+  },
+  { passive: false }
+);
+
 let touchHappened = false;
 document.querySelectorAll(".modal-exit-button").forEach((button) => {
+  function handleModalExit(e) {
+    e.preventDefault();
+    const modal = e.target.closest(".modal");
+
+    gsap.to(button, {
+      scale: 5,
+      duration: 0.5,
+      ease: "back.out(2)",
+      onStart: () => {
+        gsap.to(button, {
+          scale: 1,
+          duration: 0.5,
+          ease: "back.out(2)",
+          onComplete: () => {
+            gsap.set(button, {
+              clearProps: "all",
+            });
+          },
+        });
+      },
+    });
+  }
+  
   button.addEventListener("touchend", (e) => {
     touchHappened = true;
     e.preventDefault();
@@ -38,6 +84,7 @@ let isModalOpen = false;
 
 const showModal = (modal) => {
   modal.style.display = "block";
+  overlay.style.display = "block";
   isModalOpen = true;
   controls.enabled = false;
 
@@ -48,11 +95,24 @@ const showModal = (modal) => {
   document.body.style.cursor = "default";
   currentIntersects = [];
 
-  gsap.set(modal, {opacity: 0});
+  gsap.set(modal, {
+    opacity: 0,
+    scale: 0,
+  });
+  gsap.set(overlay, {
+    opacity: 0,
+  });
+
+  gsap.to(overlay, {
+    opacity: 1,
+    duration: 0.5,
+  });
 
   gsap.to(modal, {
-    opacity: 1, 
+    opacity: 1,
+    scale: 1,
     duration: 0.5,
+    ease: "back.out(2)",
   });
 };
 
@@ -60,24 +120,109 @@ const hideModal = (modal) => {
   isModalOpen = false;
   controls.enabled = true;
 
-  gsap.to(modal, {
-    opacity: 0, 
+  gsap.to(overlay, {
+    opacity: 0,
     duration: 0.5,
+  });
+
+  gsap.to(modal, {
+    opacity: 0,
+    scale: 0,
+    duration: 0.5,
+    ease: "back.in(2)",
     onComplete: () => {
       modal.style.display = "none";
-    } 
+      overlay.style.display = "none";
+    },
   });
 };
+
+// loading screen
+const manager = new THREE.LoadingManager();
+
+const loadingScreen = document.querySelector(".loading-screen");
+const loadingScreenButton = document.querySelector(".loading-button");
+const loadingMiffy = document.querySelector(".loading-miffy");
+
+manager.onLoad = function () {
+  loadingMiffy.style.display = "none";
+  loadingScreenButton.style.border = "8px solid #a29186";
+  loadingScreenButton.style.background = "#d6c7bc";
+  loadingScreenButton.style.color = "#f3efe4";
+  loadingScreenButton.style.boxShadow = "rgba(0, 0, 0, 0.24) 0px 3px 8px";
+  loadingScreenButton.textContent = "Enter!";
+  loadingScreenButton.style.cursor = "pointer";
+  loadingScreenButton.style.transition =
+    "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)";
+  let isDisabled = false;
+
+  function handleEnter() {
+    if (isDisabled) return;
+    loadingScreenButton.style.cursor = "default";
+    loadingScreenButton.style.border = "8px solid #a29186";
+    loadingScreenButton.style.background = "#e6e1d8";
+    loadingScreenButton.style.color = "#d6c7bc";
+    loadingScreenButton.style.boxShadow = "none";
+    loadingScreenButton.textContent = "hello :)";
+    loadingScreen.style.background = "#e6e1d8";
+    isDisabled = true;
+
+    playReveal();
+  }
+    loadingScreenButton.addEventListener("mouseenter", () => {
+    loadingScreenButton.style.transform = "scale(1.3)";
+  });
+
+  loadingScreenButton.addEventListener("touchend", (e) => {
+    touchHappened = true;
+    e.preventDefault();
+    handleEnter();
+  });
+
+  loadingScreenButton.addEventListener("click", (e) => {
+    if (touchHappened) return;
+    handleEnter();
+  });
+
+  loadingScreenButton.addEventListener("mouseleave", () => {
+    loadingScreenButton.style.transform = "none";
+  });
+};
+
+function playReveal() {
+  const tl = gsap.timeline();
+
+  tl.to(loadingScreen, {
+    scale: 0.5,
+    duration: 1.2,
+    delay: 0.25,
+    ease: "back.in(1.8)",
+  }).to(
+    loadingScreen,
+    {
+      y: "200vh",
+      transform: "perspective(1000px) rotateX(45deg) rotateY(-35deg)",
+      duration: 1.2,
+      ease: "back.in(1.8)",
+      onComplete: () => {
+        isModalOpen = false;
+        // playIntroAnimation();
+        loadingScreen.remove();
+      },
+    },
+    "-=0.1"
+  );
+}
 
 const raycasterObjects = [];
 let currentIntersects = [];
 let currentHoveredObject = null;
 
 const socialLinks = {
-  Button_Git: "https://github.com/",
-  Button_LN: "https://linkedin.com/",
-  Button_IG: "https://instagram.com/",
-  Headphones: "https://spotify.com/", 
+  Button_Git: "https://github.com/evelynhs/",
+  Button_LN: "https://www.linkedin.com/in/evelynhsiao/",
+  Button_IG: "https://instagram.com/_evelynhsiao/",
+  Headphones: "https://open.spotify.com/user/biatp2k4mglkw7xlhevxi1ek5?si=35f6f8a902e5484d/", 
 }
 
 const raycaster = new THREE.Raycaster();
@@ -86,11 +231,11 @@ const pointer = new THREE.Vector2();
 // loaders
 const textureLoader = new THREE.TextureLoader();
 
-// model loader
+// modal loader
 const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath( "/draco/" );
 
-const loader = new GLTFLoader();
+const loader = new GLTFLoader(manager);
 loader.setDRACOLoader( dracoLoader );
 
 const environmentMap = new THREE.CubeTextureLoader()
@@ -285,7 +430,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1, 
   1000 
 );
-camera.position.set(19.091589234676704, 10.089789056381026, 17.389709025564372);
+camera.position.set(21.901090061803124, 10.131792926020346, 19.12422370096304);
 const renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -300,7 +445,13 @@ controls.maxAzimuthAngle = Math.PI / 2;
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 controls.update(); 
-controls.target.set(0.0036804629215764265, 2.925270170662769, -1.3687831470571423);
+if (window.innerWidth < 768) {
+  camera.position.set(32.73023025072089, 17.603280287026216, 29.327508362833946);
+  controls.target.set(-0.43214200639627204, 3.1054695924521205, -1.7105208909239629);
+} else {
+  camera.position.set(21.901090061803124, 10.131792926020346, 19.12422370096304);
+  controls.target.set(-0.43214200639627204, 3.1054695924521205, -1.7105208909239629);
+}
 
 // event listeners
 window.addEventListener("resize", () => {
@@ -318,21 +469,17 @@ window.addEventListener("resize", () => {
 })
 
 function playHoverAnimation(object, isHovering) {
-  let scale = 1.4;
+  let scale = 1.2;
   gsap.killTweensOf(object.scale);
   gsap.killTweensOf(object.position);
   gsap.killTweensOf(object.rotation);
 
-  if (object.name.includes("Miffy") ||
-     object.name.includes("Mailbox") ||
-     object.name.includes("Pencil") ||
-     object.name.includes("Mag") ||
-     object.name.includes("Headphones") ||
-     object.name.includes("Kettle") ||
-     object.name.includes("LOTV") ||
-     object.name.includes("Box")
+  if (object.name.includes("Picture") ||
+     object.name.includes("Button") ||
+     object.name.includes("Name") ||
+     object.name.includes("Smiski") 
   ) {
-    scale = 1.2;
+    scale = 1.4;
   }
   if (object.name.includes("MatchaDrink")) {
     scale = 1;
@@ -508,7 +655,7 @@ const render = (timestamp) => {
 
       if (currentIntersectObject.name.includes("Pointer")) {
         document.body.style.cursor = "pointer";
-      } else {
+      } else { 
         document.body.style.cursor = "default";
       }
     } else {
