@@ -159,7 +159,7 @@ manager.onLoad = function () {
   function handleEnter() {
     if (isDisabled) return;
     loadingScreenButton.style.cursor = "default";
-    loadingScreenButton.style.border = "8px solid #a29186";
+    loadingScreenButton.style.border = "8px solid #d6c7bc";
     loadingScreenButton.style.background = "#e6e1d8";
     loadingScreenButton.style.color = "#d6c7bc";
     loadingScreenButton.style.boxShadow = "none";
