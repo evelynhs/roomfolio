@@ -219,7 +219,7 @@ let currentIntersects = [];
 let currentHoveredObject = null;
 
 const socialLinks = {
-  Button_Git: "https://github.com/evelynhs/",
+  Button_Git: "https://github.com/evelynhs/roomfolio",
   Button_LN: "https://www.linkedin.com/in/evelynhsiao/",
   Button_IG: "https://instagram.com/_evelynhsiao/",
   Headphones: "https://open.spotify.com/user/biatp2k4mglkw7xlhevxi1ek5?si=35f6f8a902e5484d/", 
@@ -615,7 +615,7 @@ const render = (timestamp) => {
 
   // animate fans
   zAxisFans.forEach((fan) => {
-    fan.rotation.z += 0.01;
+    fan.rotation.z += 0.03;
   });
 
   if (chairTop) {

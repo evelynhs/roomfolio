@@ -130,6 +130,13 @@ h1 {
   color: vars.$base-dark-beige;
 }
 
+.tip {
+  font-size: 29px;
+  @media screen and (min-width: 768px) {
+    display: none;
+  }
+}
+
 .desktop-instructions {
   @media screen and (max-width: 768px) {
     display: none;
@@ -207,6 +214,7 @@ h1 {
   top: 50%;
   left: 50%;
   max-width: 950px;
+  //max-height: 550px;
   //min-height: 600px;
   width: 90%;
   transform: translate(-50%, -50%);
@@ -217,6 +225,7 @@ h1 {
   background-color: vars.$base-light-beige;
   border: 8px solid vars.$base-med-beige;
   @media screen and (max-width: 640px) {
+    //height: 80%;
     padding: 20px;
   }
 }
@@ -233,6 +242,22 @@ h1 {
   font-size: 32px;
   text-align: center;
   padding: 10px 0;
+}
+
+.about.content-wrapper {
+  height: 550px;
+
+  @media screen and (max-width: 768px) {
+    height: 500px;
+  }
+}
+
+.projects.content-wrapper {
+  height: 550px;
+
+  @media screen and (max-width: 768px) {
+    height: 500px;
+  }
 }
 
 .contact.modal {
