@@ -3,6 +3,10 @@ import * as THREE from 'three';
 import { OrbitControls } from './utils/OrbitControls.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { createIcons, Github, Globe, Search } from 'lucide';
+  createIcons({
+    icons: { Search, Github, Globe }
+  });
 import gsap from 'gsap';
 
 const canvas = document.querySelector("#experience-canvas");
@@ -159,9 +163,9 @@ manager.onLoad = function () {
   function handleEnter() {
     if (isDisabled) return;
     loadingScreenButton.style.cursor = "default";
-    loadingScreenButton.style.border = "8px solid #d6c7bc";
+    loadingScreenButton.style.border = "8px solid #a29186";
     loadingScreenButton.style.background = "#e6e1d8";
-    loadingScreenButton.style.color = "#d6c7bc";
+    loadingScreenButton.style.color = "#a29186";
     loadingScreenButton.style.boxShadow = "none";
     loadingScreenButton.textContent = "hello :)";
     loadingScreen.style.background = "#e6e1d8";
